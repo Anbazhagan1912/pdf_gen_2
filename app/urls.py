@@ -5,6 +5,7 @@ urlpatterns = [
     path('create/',views.create_data,name="create_data"),
     path('all/',views.get_all_count,name="get_all_count"),
     path('update/<int:pk>',views.Update_Student_count,name="Update_Count"),
-    path('pdf_gen',views.pdf_gen,name="pdf_gen"),
-    path('loop',views.create_Loop,name="create_loop")
+    path('pdf_gen/',views.pdf_gen,name="pdf_gen"),
+    path('loop/',views.create_Loop,name="create_loop"),
+    path('updateloop/<int:total>',views.update_loop,name="update_loop")
 ]

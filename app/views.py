@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import StudentCountSeralizers
@@ -10,11 +9,11 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.shapes import Drawing,String
-from reportlab.graphics.charts.legends import Legend
 from django.http import HttpResponse
-from reportlab.lib.colors import Color, HexColor
-from reportlab.lib.units import inch
+from reportlab.lib.colors import  HexColor
 
+from reportlab.lib.units import inch
+import time
 # Create your views here.
 
 @api_view(['GET'])
@@ -53,7 +52,7 @@ def Update_Student_count(req,pk):
 @api_view(["GET",])
 def pdf_gen(req):
     items = Students.objects.all()
-    items_today = Students.objects.get(date="2023-11-11")
+    items_today = Students.objects.get(date="2023-12-12")
     response = HttpResponse(content_type="application/pdf")
     response['Content-Disposition'] = 'attachment; filename="generated_pdf.pdf"'
     doc = SimpleDocTemplate(response, pagesize=letter)
@@ -85,9 +84,9 @@ def pdf_gen(req):
     pc.height = 150
     pc.data = [items_today.on_duty,items_today.total_precent,items_today.total_absent,]
     pc.slices.strokeWidth = 1
-    pc.slices[0].popout = 20
-    pc.slices[1].popout = 10
-    pc.slices[2].popout = 10
+    pc.slices[0].popout = 25
+    pc.slices[1].popout = 20
+    pc.slices[2].popout = 20
     pc.sideLabels = False
     pc.sideLabelsOffset = 1
     title = String(0, 250, "Today Report", fontName='Helvetica-Bold', fontSize=12, fillColor=HexColor('#000000'))
@@ -132,9 +131,22 @@ def pdf_gen(req):
 
 
 @api_view(["POST"])
-def create_Loop(req):
-    data = StudentCountSeralizers(data=req.data)
-    if data.is_valid():
-        data.save()
-        return Response({"Message":"user created count "})
-    return Response({"Message":"Error"})
+def create_Loop(request):
+    start_time = time.time()
+    my_model = [Students(total=request.data.get("total"), total_precent=request.data.get("total_precent"), total_absent=request.data.get("total_absent"), on_duty=request.data.get("on_duty")) for i in range(3000) ]
+    Students.objects.bulk_create(my_model)
+    end_time = time.time()
+    return Response({"message": "Loop Completed", "execution_time": end_time - start_time}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+def update_loop(request,total):
+    datas = Students.objects.filter(total=total)
+    print(datas)
+    print(request.data.get("total"))
+    for data in datas:
+        data.total = request.data.get("total")
+        data.total_precent = request.data.get("total_precent")
+        data.total_absent = request.data.get("total_absent")
+        data.on_duty = request.data.get("on_duty")
+    Students.objects.bulk_update(datas,['total','total_precent','total_absent','on_duty'])
+    return Response({"msg":"hi"})

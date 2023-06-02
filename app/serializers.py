@@ -4,4 +4,4 @@ from .models import Students
 class StudentCountSeralizers(serializers.ModelSerializer):
     class Meta:
         model = Students
-        fields = ('__all__')
+        fields = ("total",)
